@@ -26,7 +26,7 @@ values = get_values(nums)
 if st.button("regenerate"):
     values = get_values(nums)
 
-df = pd.DataFrame({"values": values})
+df = pd.DataFrame({"values": sorted(values)})
 
 "## Values"
 st.text(values)
