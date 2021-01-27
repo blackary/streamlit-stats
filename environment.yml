@@ -9,3 +9,6 @@ dependencies:
   - matplotlib
   - scikit-learn
   - pandas
+  - black
+  - mypy
+  - flake8
