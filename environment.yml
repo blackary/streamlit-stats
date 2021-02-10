@@ -12,3 +12,4 @@ dependencies:
   - black
   - mypy
   - flake8
+  - statsmodels
