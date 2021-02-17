@@ -45,6 +45,7 @@ f"## Standard Deviation {stdev}"
 
 f"### (Mean - Mode) / stdev = {(mean - mode ) / stdev}"
 f"### 3(Mean - Median) / stdev = {3*(mean - median) / stdev}"
+f"### SCIPY Skew: {stats.skew(s)}"
 f"### Mode = 3(Median) - 2(Mean)? {mode} = {3*median} - {2*mean} = {3*median - 2*mean}"
 
 st.pyplot(fig)
