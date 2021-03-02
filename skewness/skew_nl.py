@@ -85,7 +85,7 @@ data['Median'] = data['Data'].median()
 # ----------------------------------------------------------
 if plot_type == 'Bar plot':
     fig, ax = plt.subplots()
-    vals=ax.hist(data['Data'], density=True, histtype='stepfilled', alpha=0.2,bins=12)
+    vals=ax.hist(data['Data'], density=True, histtype='stepfilled', alpha=0.2,bins=14)
     st.pyplot(fig)
     n=vals[0]
     bins=vals[1]
