@@ -43,8 +43,8 @@ y = (
     ** exp_coeff
 )
 
+st.write(f"## Using equations from video:")
 """
-Using equations for sample:
 First, get deviation from mean for both variables. (x-xbar),(y-ybar).
 Then, multiply (x-xbar)(y-ybar). Pos: same sign; neg: diff sign.
 """
@@ -58,28 +58,27 @@ st.write('COV(x,y)=sigmaxy=',sigmaxy)
 
 # Get variance of x
 # VAR(x)=sigmax^2 = sum(xi-xbar)^2/(n-1).
-var_x = sum(xdiff)**2/(num_pts-1)
+var_x = sum(xdiff**2)/(num_pts-1)
 st.write('var(x)',var_x)
 sigmax = var_x**0.5
-var_y = sum(ydiff)**2/(num_pts-1)
+var_y = sum(ydiff**2)/(num_pts-1)
 st.write('var(y)',var_y)
 sigmay = var_y**0.5
 
 # CORR(x,y)=rhoxy = sigmaxy/(sigmax*sigmay).  -1<=rho<=1.
 corr = sigmaxy/(sigmax*sigmay)
-st.write('corr(x,y)=rho=',corr)
+st.write('CORR(x,y)=rho=',corr)
 st.write(np.cov(x,y))
 
-"""Using built-in numpy calculations:"""
+st.write(f"## Using built-in numpy calculations:")
 stacked = np.stack([x, y], axis=0)
-st.write(f"### Covariance: {np.cov(stacked)[0][1]}")
-st.write(f"### Correlation: {np.corrcoef(stacked)[0][1]}")
+st.write(f"Covariance: {np.cov(stacked)[0][1]}")
+st.write(f"Correlation: {np.corrcoef(stacked)[0][1]}")
 
 
 # ----------------------------------------------------------
 # Plot the data.
 # ----------------------------------------------------------
-# Plot the data
 fig, ax = plt.subplots()
 ax.scatter(x, y)
 st.pyplot(fig)
