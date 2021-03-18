@@ -27,10 +27,10 @@ st.title('Correlation-Covariance Comparison')
 # ----------------------------------------------------------
 num_pts = st.sidebar.slider("How many values:", min_value=1, max_value=200, value=20)
 linear_coeff = st.sidebar.slider(
-    "Linear Coeff:", value=2.0, min_value=-5.0, max_value=5.0, step=0.25
+    "Linear Coefficient (y=#x):", value=2.0, min_value=-5.0, max_value=5.0, step=0.25
 )
-random_coeff = st.sidebar.slider("Random Coeff:", value=10, min_value=-10, max_value=10)
-exp_coeff = st.sidebar.slider("Exp Coeff:", value=1, min_value=-5, max_value=5)
+random_coeff = st.sidebar.slider("Magnitude of Random Noise:", value=20, min_value=0, max_value=10)
+exp_coeff = st.sidebar.slider("Raise to power:", value=1, min_value=-5, max_value=5)
 
 
 # ----------------------------------------------------------
@@ -45,6 +45,7 @@ y = (
 
 st.write(f"## Using equations from video:")
 """
+Covariance: tells us if relationship is positive or negative.  
 First, get deviation from mean for both variables. (x-xbar),(y-ybar).
 Then, multiply (x-xbar)(y-ybar). Pos: same sign; neg: diff sign.
 """
@@ -65,7 +66,10 @@ var_y = sum(ydiff**2)/(num_pts-1)
 st.write('var(y)',var_y)
 sigmay = var_y**0.5
 
-# CORR(x,y)=rhoxy = sigmaxy/(sigmax*sigmay).  -1<=rho<=1.
+"""
+Correlation tells us the strength of the relationship.  
+CORR(x,y): sigmaxy/(sigmax*sigmay). -1<=rho<=1.
+"""
 corr = sigmaxy/(sigmax*sigmay)
 st.write('CORR(x,y)=rho=',corr)
 st.write(np.cov(x,y))
