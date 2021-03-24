@@ -9,6 +9,8 @@ Fourth (standardised) moment: kurtosis. Population is easy, sample eqn is diffic
 
 Normal distribution has kurtosis=3. More pronounced central and tails >3.
 Broader shoulders, stocky distribution <3.  Ranges from 1 to infinity.
+Skinnier shoulders, more kurtosis.  Kurt is rudely brief and blunt, so it falls off 
+quickly as you go out.
 Excess kurtosis = kurtosis-3.
 Recall, standard deviation=variance^2.
 
