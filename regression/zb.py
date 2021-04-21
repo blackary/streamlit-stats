@@ -36,8 +36,10 @@ def sum_squared_error(params, X, Y):
     slope = params[0]
     intercept = params[1]
     Y_hat = X * slope + intercept
-    return np.sum((Y_hat - Y) ** 2)
+    return np.sum((Y_hat - Y) ** 10)
 
+
+arr = np.array([1, 2, 3])
 
 X = np.linspace(0, 100, num=1000)
 Y = model_with_noise(X)
@@ -51,6 +53,7 @@ x0 = np.array([1, 0])
 minimized = minimize(sum_abs_error, x0, method="Nelder-Mead", args=(X, Y))
 slope = minimized["x"][0]
 intercept = minimized["x"][1]
+
 st.write("Underlying model: y = 2 x + 5")
 st.write(f"Minimizing sum of absolute error: y = {slope:.3} x + {intercept:.3}")
 # st.write(minimized)
@@ -72,15 +75,7 @@ ax.legend()
 
 st.write(fig)
 
-"""
-## More exploration to be done:
-
-* Which is the "best fit"? (how to even measure this in an absolute sense?)
-* If you pick a random subset of the points and do the same fitting, which one has lower variance?
-* If you change the random seed, which one has the lower variance?
-"""
-
-"## Trying taking 100 different samples of X, and doing each fit, and looking at mean: "
+"## Trying taking 100 different samples of X & Y, and doing each fit, and looking at mean & stdev: "
 linear_slopes = []
 linear_intercepts = []
 square_slopes = []
@@ -89,14 +84,23 @@ for i in range(100):
     np.random.seed(i)
     X_sub = np.random.choice(X, size=100)
     Y_sub = model_with_noise(X_sub)
-    minimized = minimize(sum_abs_error, x0, method="Nelder-Mead", args=(X, Y))["x"]
+    minimized = minimize(sum_abs_error, x0, method="Nelder-Mead", args=(X_sub, Y_sub))[
+        "x"
+    ]
     linear_slopes.append(minimized[0])
     linear_intercepts.append(minimized[1])
-    minimized = minimize(sum_squared_error, x0, method="Nelder-Mead", args=(X, Y))["x"]
+    minimized = minimize(
+        sum_squared_error, x0, method="Nelder-Mead", args=(X_sub, Y_sub)
+    )["x"]
     square_slopes.append(minimized[0])
     square_intercepts.append(minimized[1])
 
-st.write("Linear slope mean:", np.mean(linear_slopes))
-st.write("Linear intercept mean:", np.mean(linear_intercepts))
-st.write("Square slope mean:", np.mean(square_slopes))
-st.write("Square intercept mean:", np.mean(square_intercepts))
+f"""
+Equation using absolute error:
+
+    y = ({np.mean(linear_slopes):.2f} +/- {np.std(linear_slopes):.2f}) x + ({np.mean(linear_intercepts):.2f} +/- {np.std(linear_intercepts):.2f})
+
+Equation using square error:
+
+    y = ({np.mean(square_slopes):.2f} +/- {np.std(square_slopes):.2f}) x + ({np.mean(square_intercepts):.2f} +/- {np.std(square_intercepts):.2f})
+"""
