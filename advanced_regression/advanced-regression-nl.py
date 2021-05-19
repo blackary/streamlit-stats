@@ -31,12 +31,69 @@ include variable b, transform them in various ways, etc.
 
 st.write(f"## ANOVA Testing")
 
-df = pd.read_csv("regression_output/housing.csv")
+df = pd.read_csv("../regression_output/housing.csv")
+df=pd.get_dummies(df)
+cols = df.columns.tolist()
+#st.write(cols)
+
 
 ######### SINGLE FEATURE ##########
 st.write(f"### Comparing single feature")
 
-x = df['LotArea'] #df[columns_to_use]
+selection1 = st.selectbox('Variable to investigate:',cols)
+
+mean1 = df[selection1].mean()
+median1 = df[selection1].median()
+std1 = df[selection1].std()
+
+trans = st.radio('Transformation',['None','log','sqrt'])
+if trans=='None':
+    trans_data = df[selection1]
+if trans=='log':
+    trans_data = np.log(df[selection1])
+if trans=='sqrt':
+    trans_data = np.sqrt(df[selection1])
+
+
+# Plot the results
+fig, axs = plt.subplots(2, 2)
+
+fig.suptitle('Feature Transforms', fontsize=14, fontweight='bold')
+ax=axs[0,0]
+ax.hist(df[selection1])
+ax.set_xlabel('Predictor Value')
+ax.set_ylabel('Count')
+ax.set_title(f'Original Histogram \nMean: {mean1:.1f}, Median: {median1:.1f}, Std: {std1:.1f}')
+ax.legend()
+
+ax=axs[1,0]
+ax.scatter(df[selection1],df['SalePrice'])
+ax.set_xlabel('Predictor')
+ax.set_ylabel('Target')
+ax.set_title(f'Original {selection1} vs SalePrice')
+ax.legend()
+
+ax=axs[1,1]
+ax.scatter(trans_data,df['SalePrice'])
+ax.set_xlabel('Predictor')
+ax.set_ylabel('Target')
+ax.set_title(f'Transformed {selection1} vs SalePrice')
+ax.legend()
+
+ax=axs[0,1]
+ax.set_title('Transformed data')
+ax.hist(trans_data)
+ax.set_xlabel('Predictor Value')
+ax.set_ylabel('Count')
+plt.tight_layout()
+
+st.pyplot(fig)
+
+
+######################################################
+
+st.write('# Additional')
+x = trans_data #df['LotArea'] #df[columns_to_use]
 y = df['SalePrice']
 m,b = np.polyfit(x,y,1)  # Fit the first-order regression to the data.
 yhat = m*x+b
@@ -69,7 +126,7 @@ ax.scatter(x, y)
 ax.plot(x,yhat,'r',label=eqn1)
 ax.set_xlabel('Predictor')
 ax.set_ylabel('Target')
-ax.set_title('Linear regression fit: single feature vs target')
+ax.set_title('Linear regression fit: single feature (LotArea) vs target')
 ax.legend()
 st.pyplot(fig)
 
@@ -78,6 +135,7 @@ st.pyplot(fig)
 ###### NEW MODEL #######
 st.write(f'### Multi-Linear Regression')
 x = df[['LotArea','OverallQual','YearBuilt']] #df[columns_to_use]
+st.write(x)
 model = LinearRegression().fit(x, y)
 r2 = model.score(x, y)
 st.write('R2:',r2)
