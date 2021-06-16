@@ -29,8 +29,6 @@ impact of age on salary.
 """
 
 
-# Divide a variable into categories.
-# Test the dummy variable trap.
 def fit_linreg(x,y):
     """
     Fit the first-order regression to the data.
@@ -55,13 +53,13 @@ def fit_linreg(x,y):
     return m,b,yhat,R2
 
 
-df = pd.read_csv("regression_output/housing.csv")
-
-
+# Divide a variable into categories.
+# Test the dummy variable trap.
 # ---------------------------------------------------------------
 # COMPARE ORIGINAL FEATURE WITH TRANSFORMED FEATURE.
 # ---------------------------------------------------------------
 st.write("## Analyze how the dummy variable trap impacts model fitting.")
+df = pd.read_csv("regression_output/housing.csv")
 
 feature_type = st.sidebar.selectbox('Type of feature:',['string','number'])
 if feature_type=='number':
@@ -87,34 +85,12 @@ st.write(dummies)
 
 
 # ---------------------------------------------------------------
-# # Plot the feature comparison results.
-# ---------------------------------------------------------------
-
-# ---------------------------------------------------------------
-# CREATE SINGLE LINEAR REGRESSION MODEL USING BOTH DATASETS.
-# ---------------------------------------------------------------
-#st.write('## Create Linear Regression')
-#"""Compare linear regression with original vs transformed input data."""
-#x = dummies
-#xt = trans_data #df['LotArea'] #df[columns_to_use]
-y = df['SalePrice']
-
-#m,b,yhat_orig,R2_orig = fit_linreg(x,y)
-#eqn_orig = f'y={m:.2f}x+{b:.2f}'
-
-#m,b,yhat_new,R2_new = fit_linreg(xt,y)
-#eqn_new = f'y={m:.2f}x+{b:.2f}'
-
-#st.write(f'R2 Original: {R2_orig:.2f}')
-#st.write(f'R2 New: {R2_new:.2f}')
-
-
-# ---------------------------------------------------------------
 # CREATE MULTI-LINEAR REGRESSION MODEL.
 # ---------------------------------------------------------------
 st.write(f'## Multi-Linear Regression')
-x = dummies #df[columns_to_use]
-#st.write(x)
+x = dummies
+y = df['SalePrice']
+
 model = LinearRegression().fit(x, y)
 r2 = model.score(x, y)
 st.write('R2:',r2)
