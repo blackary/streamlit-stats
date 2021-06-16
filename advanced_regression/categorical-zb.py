@@ -5,11 +5,16 @@ from sklearn.linear_model import LinearRegression
 
 """
 # Categorical X Variables and Interaction Terms
+
+
+### Try dropping everything but SaleCondition to see the effects of not dropping the first
 """
 
 df = pd.read_csv("regression_output/housing.csv")
 
+print(df.SaleCondition)
 df["SaleConditionCat"] = pd.Categorical(df["SaleCondition"])
+print(df.SaleConditionCat)
 df["SaleConditionCatInts"] = df["SaleConditionCat"].cat.codes.astype("int")
 
 st.write(df["SaleConditionCat"].unique())
@@ -44,7 +49,6 @@ if "SaleConditionCatInts" in X_VARS:
 
 df = pd.get_dummies(df, columns=["SaleConditionCat"], drop_first=drop_first)
 
-# y_var = ["SalePrice"]
 df["LogSalePrice"] = np.log(df["SalePrice"])
 y_var = ["LogSalePrice"]
 
