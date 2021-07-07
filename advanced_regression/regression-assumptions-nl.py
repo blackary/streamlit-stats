@@ -4,25 +4,25 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
+st.write(f"# Regression Assumptions")
 """
-Regression Assumptions
+Dangers: Coefficients can be biased.  Standard errors could be unreliable (then so too would be t-stat and p-value).
 """
 """ 
-Coefficients can be biased.  Standard errors could be unreliable (then so too would be t-stat and p-value).
 1. Linearity
-    The regression needs to be linear in the parameters. You can have x^2 terms to represent squared data, so
+    - The regression needs to be linear in the parameters. You can have x^2 terms to represent squared data, so
     the relationship is linear with y (and additive).
 2. Constant Error Variance
-    If you map out the distances between points and black fitted line, the variance scales with the values of the data.
+    - If you map out the distances between points and black fitted line, the variance scales with the values of the data.
     We don't want Heteroskedasticity.
 3. Independent Error Terms
-    Autocorrelation - a snaking plot - is bad.
+    - Autocorrelation - a snaking plot - is bad.
 4. Normal errors
-    Error spread needs to be normally distributed (bell-shaped).
+    - Error spread needs to be normally distributed (bell-shaped).
 5. No multi-collinearity
-    Need to have truly independent x terms.
+    - Need to have truly independent x terms.
 6. Exogeneity
-    Omitted variable bias.
+    - Omitted variable bias.
 """
 """
 Detailed 1:
@@ -90,14 +90,17 @@ def fit_linreg(x: np.ndarray, y: np.ndarray):
 
 def single_regression(x,y):
     st.write(f"## Linear Regression")
+    st.write('GOAL: Predict sale price of house.')
     m,b,yhat,R2 = fit_linreg(x,y)
     eqn1 = f'y = {m:.1f}x+{b:.1f}'
 
     # Plot the results of linear fit
     fig, ax = plt.subplots()
-    ax.scatter(x, y,label='Feature Data')
+    ax.scatter(x, y, label='Raw Data')
     ax.plot(x,yhat,'r',label=eqn1)
     ax.set_title('Plot of Linear Fit')
+    ax.set_xlabel('Feature Value')
+    ax.set_ylabel('Sale Price')
     ax.legend()
     st.pyplot(fig)
     st.write(f"#### R2: {R2:.4f}")
@@ -107,20 +110,23 @@ def single_regression(x,y):
     ax.scatter(x, yhat-y, color='black')
     #ax.plot(x,yhat-y,'r',label=eqn1)
     ax.set_title('Plot of Residuals')
+    ax.set_xlabel('Feature Value')
+    ax.set_ylabel('Residual Error')
     st.pyplot(fig)
     #sns.residplot(x=x, y=y, lowess=True, color="g")
 
 
 def multi_regression(x_mult,y):
     st.write(f'## Multi-Linear Regression')
+    st.write('GOAL: Predict sale price of house.')
     st.write(f'### Fitted Regression:')
     model = LinearRegression().fit(x_mult, y)
     r2 = model.score(x_mult, y)
-    yvals = model.predict(x_mult)
+    yhat = model.predict(x_mult)
 
     # Plot the results
     fig, ax = plt.subplots()
-    ax.scatter(y, yvals, label='Model prediction')
+    ax.scatter(y, yhat, label='Model prediction')
     ax.plot(y,y,'orange',label='Perfect prediction')
     ax.set_xlabel('Prediction')
     ax.set_ylabel('Target')
@@ -133,6 +139,17 @@ def multi_regression(x_mult,y):
     st.write(f"Intercept: {b0:.2f}")
     st.write('Coefficients:',coeffs)
     st.write(f"#### R2: {r2:.3f}")
+
+    # Plot the RESIDUALS
+    fig, ax = plt.subplots()
+    ax.scatter(y, yhat-y, color='black', label='yhat-y')
+    #ax.plot(x,yhat-y,'r',label=eqn1)
+    ax.set_title('Plot of Residuals')
+    ax.set_ylabel('Target')
+    ax.set_xlabel('Prediction')
+    ax.legend()
+    st.pyplot(fig)
+    #sns.residplot(x=x, y=y, lowess=True, color="g")
 
 
 def run_vif(x: pd.DataFrame):
