@@ -1,4 +1,8 @@
 import numpy as np
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 
 """
 Regression Assumptions
@@ -53,28 +57,139 @@ Variance Inflation Factor (VIF) shows how much that variable's information is hi
 Solution: remove one of variables. DO NOT multiply the variables together to fix this.
 
 Detailed 6:
-
+Omitted variable bias - a variable affects both X and Y, but is not included in the model.
+Socio-economic status would affect error term ei in the model. Thus, education is no longer wholly exogenous as it can be explained
+in part by the error term. Error term is not fully random. Children of professors vs children of janitors - this likely impacts
+years of education and salary. Result: Model can only be used for predictive purposes (can not infer causation). Can still get a
+valid prediction, but I can't say it's that 13th year of education that gave me this amount of higher salary.
 """
-# In-video example:
 
-# (a) Probability that a $4,500 car with a pink slip will sell.
-slip = 1
-price = 4.5  # In thousands
-log_odds = 0.396 - 0.173*price + 1.555*slip
-odds1 = np.exp(log_odds)
-prob1 = odds1/(1+odds1)
+def fit_linreg(x: np.ndarray, y: np.ndarray):
+    """
+    Fit the first-order regression to the data.
+    Returns m, b, yhat, R2.
+    """
+    m,b = np.polyfit(x,y,1)
+    yhat = m*x+b
 
-# (b) Probability that a $4,500 car without a pink slip will sell.
-slip = 0
-price = 4.5  # In thousands
-log_odds = 0.396 - 0.173*price + 1.555*slip
-odds0 = np.exp(log_odds)
-prob0 = odds0/(1+odds0)
+    # Step 2
+    ei = y-yhat
+    ybar = np.mean(y)
+    # Calculate error of fit.
+    #Step 3
+    SSR = sum((yhat-ybar)**2)
+    #Step 4
+    SSE = sum((ei)**2)
+    #Step 5
+    SST = SSR+SSE
+    #Step 6
+    R2 = SSR/SST
 
-# (c) Odds ratio for odds of sale (a) vs odds of sale (b).
-# Thus, a number greater than 1 means a car with a pink slip is more
-# likely to sell than a car without a pink slip.
-odds_ratio = odds1/odds0
-print(prob1)
-print(prob0)
-print(odds_ratio)
+    return m,b,yhat,R2
+
+
+def single_regression(x,y):
+    st.write(f"## Linear Regression")
+    m,b,yhat,R2 = fit_linreg(x,y)
+    eqn1 = f'y = {m:.1f}x+{b:.1f}'
+
+    # Plot the results of linear fit
+    fig, ax = plt.subplots()
+    ax.scatter(x, y,label='Feature Data')
+    ax.plot(x,yhat,'r',label=eqn1)
+    ax.set_title('Plot of Linear Fit')
+    ax.legend()
+    st.pyplot(fig)
+    st.write(f"#### R2: {R2:.4f}")
+
+    # Plot the RESIDUALS
+    fig, ax = plt.subplots()
+    ax.scatter(x, yhat-y, color='black')
+    #ax.plot(x,yhat-y,'r',label=eqn1)
+    ax.set_title('Plot of Residuals')
+    st.pyplot(fig)
+    #sns.residplot(x=x, y=y, lowess=True, color="g")
+
+
+def multi_regression(x_mult,y):
+    st.write(f'## Multi-Linear Regression')
+    st.write(f'### Fitted Regression:')
+    model = LinearRegression().fit(x_mult, y)
+    r2 = model.score(x_mult, y)
+    yvals = model.predict(x_mult)
+
+    # Plot the results
+    fig, ax = plt.subplots()
+    ax.scatter(y, yvals, label='Model prediction')
+    ax.plot(y,y,'orange',label='Perfect prediction')
+    ax.set_xlabel('Prediction')
+    ax.set_ylabel('Target')
+    ax.set_title('Prediction accuracy of multi-linear regression')
+    ax.legend()
+    st.pyplot(fig)
+
+    b0 = model.intercept_
+    coeffs = model.coef_
+    st.write(f"Intercept: {b0:.2f}")
+    st.write('Coefficients:',coeffs)
+    st.write(f"#### R2: {r2:.3f}")
+
+
+def run_vif(x: pd.DataFrame):
+    from statsmodels.stats.outliers_influence import variance_inflation_factor
+    st.write(f"### Feature Relationships:")
+    # VIF dataframe
+    vif_data = pd.DataFrame()
+    vif_data["feature"] = x.columns
+    # Calculating VIF for each feature
+    names = x.columns
+    vif_data["VIF"] = [variance_inflation_factor(x.values, i) for i in range(len(names))]
+    vif_data = vif_data.style.background_gradient(cmap='Reds',vmin=0,vmax=100)
+    corr_table = x.corr().style.background_gradient(cmap='bwr',vmin=-1,vmax=1)
+    st.write('Correlation:',corr_table)
+    st.write('VIF:',vif_data)
+
+
+# ---------------------------------------------------------------
+# READ AND SELECT DATA OF INTEREST.
+# ---------------------------------------------------------------
+df = pd.read_csv("regression_output/housing.csv")
+feature_type = st.sidebar.selectbox('Type of feature:',['string','number'])
+
+if feature_type == 'number':
+    cols = df.select_dtypes(include=['int64','float64']).columns.tolist()
+    selections = st.sidebar.multiselect('Select one or more features:', cols)
+    chosen_data = df[selections]
+    st.write(f"### Chosen data:")
+    st.write(chosen_data)
+elif feature_type == 'string':
+    cols = df.select_dtypes(include=['object']).columns.tolist()
+    selections = st.sidebar.selectbox('Select a feature:', cols)
+
+    orig_data = df[selections]
+    st.write(f'#### Original feature unique values:')
+    st.write(orig_data.unique())  #SaleCondition, SaleType
+
+    # Get dummies splits into multiple 1/0 categorical columns.
+    # pd.Categorical creates single categorical column (must then convert to ints).
+    drop_first = st.sidebar.radio('Drop first dummy',['True','False'])
+    if drop_first == 'True':
+        chosen_data = pd.get_dummies(orig_data,drop_first=True)
+    else:
+        chosen_data = pd.get_dummies(orig_data,drop_first=False)
+    st.write(f'#### Convert to dummies:')
+    st.write(chosen_data)
+
+
+# ----------------------------------------------------------
+# Create the dataset of choice.
+# ----------------------------------------------------------
+x = chosen_data
+y = df['SalePrice']
+
+if len(chosen_data.columns) > 1:
+    multi_regression(x,y)
+    run_vif(x)
+elif len(chosen_data.columns) == 1:
+    x = x.to_numpy()[:,0]
+    single_regression(x,y)
